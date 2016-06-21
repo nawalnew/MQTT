@@ -17,6 +17,13 @@ app.get('/', function(req, res) {
   });
 });
 
+// Send AJAX!
+app.get("/string", function(req, res) {
+    var strings = ["rad", "bla", "ska"]
+    var n = Math.floor(Math.random() * strings.length)
+    res.send(strings[n])
+})
+
 app.listen(8080);
 console.log('8080 for the win');
 

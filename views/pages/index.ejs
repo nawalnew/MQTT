@@ -25,12 +25,26 @@ Opened <span id="refresh"><%= opened %></span><br />
     <footer>
         <% include ../partials/footer %>
     </footer>
+    <script   src="https://code.jquery.com/jquery-3.0.0.min.js"   integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0="   crossorigin="anonymous"></script>
+
+
     <script>
+
         function updateValue(){
             document.getElementById("refresh").innerHTML="<%= opened %>";
+            console.log('intervall');
+
+
+            $.get("/string", function(string) {
+              console.log(string);
+            })
         }
         setInterval(updateValue, 2000);
         console.log('test');
+
+
     </script>
+
+
 </body>
 </html>
