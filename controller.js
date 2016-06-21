@@ -1,12 +1,14 @@
 //
 var express = require('express');
 var app = express();
+var path    = require("path");
 
 //MQTT
 const mqtt = require('mqtt')
 
 app.get('/', function (req, res) {
-  res.send('Hello World!');
+  // res.send('Hello World!');
+  res.sendFile(path.join(__dirname, '/', 'index.html'));
 });
 
 app.listen(3000, function () {
@@ -19,6 +21,7 @@ const client = mqtt.connect('mqtt://broker.hivemq.com')
 
 var garageState = ''
 var connected = true
+var testvariable = 'testvariable 1'
 
 client.on('connect', () => {
   client.subscribe('garage/connected')
@@ -52,6 +55,8 @@ function openGarageDoor () {
   if (connected && garageState !== 'open') {
     // Ask the door to open
     client.publish('garage/open', 'true')
+     testvariable = 'testvariable 2'
+
   }
 }
 
@@ -60,6 +65,7 @@ function closeGarageDoor () {
   if (connected && garageState !== 'closed') {
     // Ask the door to close
     client.publish('garage/close', 'true')
+    testvariable = 'testvariable 3'
   }
 }
 
@@ -75,4 +81,4 @@ setTimeout(() => {
 setTimeout(() => {
   console.log('close door')
   closeGarageDoor()
-}, 20000)
+}, 80000)
