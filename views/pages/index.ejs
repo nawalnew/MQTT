@@ -14,8 +14,7 @@
     <main>
         <div class="jumbotron">
             <h1>Bananonymous</h1>
-            My temperature: <%= temp %><br />
-Temp + 10 : <%= total %><br /><br />
+
 
 Opened <span id="refresh"><%= opened %></span><br />
 
@@ -25,22 +24,29 @@ Opened <span id="refresh"><%= opened %></span><br />
     <footer>
         <% include ../partials/footer %>
     </footer>
+
+
+
+
     <script   src="https://code.jquery.com/jquery-3.0.0.min.js"   integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0="   crossorigin="anonymous"></script>
 
 
     <script>
 
         function updateValue(){
-            document.getElementById("refresh").innerHTML="<%= opened %>";
-            console.log('intervall');
 
+          // AJAX Call to get change of string
+          $.get("/string", function(string) {
+            console.log(string);
+            document.getElementById("refresh").innerHTML=string;
 
-            $.get("/string", function(string) {
-              console.log(string);
-            })
+          })
+
         }
+
+        // Intervall to Update Values in HTML
         setInterval(updateValue, 2000);
-        console.log('test');
+
 
 
     </script>
