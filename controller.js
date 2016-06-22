@@ -36,6 +36,7 @@ console.log('8080 for the win');
 // Define Variables for States of Sensors
 var forceState = ''
 var connected = true
+//var message
 
 
 var opened = 1;
@@ -54,15 +55,22 @@ client.on('message', (topic, message) => {
 
     // If Message in chanel do something
     case 'comcar/car':
-      // Function to handle the State
-       return handleForceState(message)
+       return testCheck(message)
+    case 'comcar/shower':
+      return showerCheck(message)
+    case 'comcar/drawer':
+      return drawerCheck(message)
+    case 'comcar/bed':
+      return bedCheck(message)
+       
+       
   }
 
 })
 
 
 
-function handleForceState (message) {
+function showerCheck (message) {
 
   forceState = message // Put Value into var: forceState
   console.log('Force Touch %s', message)
@@ -70,6 +78,56 @@ function handleForceState (message) {
   if (connected && forceState == 'used') {
       // Say something?
       //  client.publish('comcar/car', 'true')
+
      }
+  if (forceState == 'true') {
+    console.log('KITTENS')
+  }
+
+}
+
+function bedCheck (message) {
+
+  forceState = message // Put Value into var: forceState
+  console.log('Force Touch %s', message)
+
+  if (connected && forceState == 'used') {
+      // Say something?
+      //  client.publish('comcar/car', 'true')
+
+     }
+  if (forceState == 'true') {
+    console.log('KITTENS')
+  }
+
+}
+function testCheck(message) {
+
+  forceState = message // Put Value into var: forceState
+  console.log('Force Touch %s', message)
+
+  if (connected && forceState == 'used') {
+      // Say something?
+      //  client.publish('comcar/car', 'true')
+
+     }
+  if (forceState == 'true') {
+    console.log('KITTENS')
+  }
+
+}
+function drawerCheck (message) {
+
+  forceState = message // Put Value into var: forceState
+  console.log('Force Touch %s', message)
+
+  if (connected && forceState == 'used') {
+      // Say something?
+      //  client.publish('comcar/car', 'true')
+
+     }
+  if (forceState == 'true') {
+    console.log('KITTENS')
+  }
 
 }
