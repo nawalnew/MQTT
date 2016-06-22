@@ -40,11 +40,14 @@ var connected = true
 
 
 var opened = 1;
+var sensorCounter = 0;
 
 client.on('connect', () => {
 
   // Subscribe to chanel
   client.subscribe('comcar/car')
+  client.subscribe('comcar/home/water/1')
+  client.subscribe('comcar/home/force/1')
 
 })
 
@@ -56,16 +59,15 @@ client.on('message', (topic, message) => {
     // If Message in chanel do something
     case 'comcar/car':
        return testCheck(message)
-    case 'comcar/shower':
+    case 'comcar/home/water/1':
       return showerCheck(message)
     case 'comcar/drawer':
       return drawerCheck(message)
-    case 'comcar/bed':
+    case 'comcar/home/force/1':
       return bedCheck(message)
        
        
   }
-
 })
 
 
@@ -73,7 +75,6 @@ client.on('message', (topic, message) => {
 function showerCheck (message) {
 
   forceState = message // Put Value into var: forceState
-  console.log('Force Touch %s', message)
 
   if (connected && forceState == 'used') {
       // Say something?
@@ -81,15 +82,23 @@ function showerCheck (message) {
 
      }
   if (forceState == 'true') {
-    console.log('KITTENS')
+    sensorCounter++;
+    console.log(sensorCounter)
+    console.log('shower true')
+  } else {
+    sensorCounter--;
+    console.log(sensorCounter)
+    console.log('shower false')
   }
+
+  sensorCounterCheck();
 
 }
 
 function bedCheck (message) {
 
   forceState = message // Put Value into var: forceState
-  console.log('Force Touch %s', message)
+  bed = forceState
 
   if (connected && forceState == 'used') {
       // Say something?
@@ -97,14 +106,22 @@ function bedCheck (message) {
 
      }
   if (forceState == 'true') {
-    console.log('KITTENS')
+    sensorCounter++;
+    console.log(sensorCounter)
+    console.log('bed true')
+  } else {
+    sensorCounter--;
+    console.log(sensorCounter)
+    console.log('bed false')
   }
+
+sensorCounterCheck();
 
 }
 function testCheck(message) {
 
   forceState = message // Put Value into var: forceState
-  console.log('Force Touch %s', message)
+
 
   if (connected && forceState == 'used') {
       // Say something?
@@ -112,22 +129,46 @@ function testCheck(message) {
 
      }
   if (forceState == 'true') {
-    console.log('KITTENS')
+    sensorCounter++;
+    console.log(sensorCounter)
+    console.log('test true')
+  } else {
+    sensorCounter--;
+    console.log(sensorCounter)
+    console.log('test false')
   }
 
+sensorCounterCheck();
+
 }
+
 function drawerCheck (message) {
 
   forceState = message // Put Value into var: forceState
-  console.log('Force Touch %s', message)
+
 
   if (connected && forceState == 'used') {
       // Say something?
       //  client.publish('comcar/car', 'true')
 
      }
+
   if (forceState == 'true') {
-    console.log('KITTENS')
+    sensorCounter++;
+    console.log(sensorCounter)
+    console.log('test true')
+  } else {
+    sensorCounter--;
+    console.log(sensorCounter)
+    console.log('test false')
   }
 
+sensorCounterCheck();
+
 }
+
+function sensorCounterCheck() {
+  if (sensorCounter >= 4) {
+    client.publish('comcar/car', 'Auto kommt!')
+  }
+} 
