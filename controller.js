@@ -41,6 +41,11 @@ var connected = true
 
 var opened = 1;
 var sensorCounter = 0;
+var bed = false;
+var shower = false;
+var drawer = false;
+var test = false;
+
 
 client.on('connect', () => {
 
@@ -57,8 +62,8 @@ client.on('message', (topic, message) => {
     //   return handleGarageConnected(message)
 
     // If Message in chanel do something
-    case 'comcar/car':
-       return testCheck(message)
+    //case 'comcar/car':
+       //return testCheck(message)
     case 'comcar/home/water/1':
       return showerCheck(message)
     case 'comcar/drawer':
@@ -83,9 +88,11 @@ function showerCheck (message) {
      }
   if (forceState == 'true') {
     sensorCounter++;
+    shower = true;
     console.log(sensorCounter)
     console.log('shower true')
   } else {
+    shower = false;
     sensorCounter--;
     console.log(sensorCounter)
     console.log('shower false')
@@ -98,7 +105,6 @@ function showerCheck (message) {
 function bedCheck (message) {
 
   forceState = message // Put Value into var: forceState
-  bed = forceState
 
   if (connected && forceState == 'used') {
       // Say something?
@@ -107,9 +113,11 @@ function bedCheck (message) {
      }
   if (forceState == 'true') {
     sensorCounter++;
+    bed = true;
     console.log(sensorCounter)
     console.log('bed true')
   } else {
+    bed = false;
     sensorCounter--;
     console.log(sensorCounter)
     console.log('bed false')
@@ -118,7 +126,8 @@ function bedCheck (message) {
 sensorCounterCheck();
 
 }
-function testCheck(message) {
+
+/*function testCheck(message) {
 
   forceState = message // Put Value into var: forceState
 
@@ -130,17 +139,19 @@ function testCheck(message) {
      }
   if (forceState == 'true') {
     sensorCounter++;
+    test = true;
     console.log(sensorCounter)
     console.log('test true')
   } else {
     sensorCounter--;
+    test = false;
     console.log(sensorCounter)
     console.log('test false')
   }
 
 sensorCounterCheck();
 
-}
+}*/
 
 function drawerCheck (message) {
 
@@ -155,9 +166,11 @@ function drawerCheck (message) {
 
   if (forceState == 'true') {
     sensorCounter++;
+    drawer = true;
     console.log(sensorCounter)
     console.log('test true')
   } else {
+    drawer = false;
     sensorCounter--;
     console.log(sensorCounter)
     console.log('test false')
@@ -168,7 +181,35 @@ sensorCounterCheck();
 }
 
 function sensorCounterCheck() {
-  if (sensorCounter >= 4) {
-    client.publish('comcar/car', 'Auto kommt!')
+  if (sensorCounter == 1) {
+    client.publish('comcar/car', 'count auf 1')
+  } else if (sensorCounter == 2) {
+    client.publish('comcar/car', 'count auf 2')
   }
-} 
+  else if (sensorCounter == 3) {
+    client.publish('comcar/car', 'count auf 3')
+  }
+  else if (sensorCounter == 4) {
+    client.publish('comcar/car', 'count auf 4')
+  }
+  else if (sensorCounter == 5) {
+    client.publish('comcar/car', 'count auf 5, auto kommt!')
+  }
+  /*switch (sensorCounter) {
+    case sensorCounter <2 || sensorCounter > 5:
+      break;
+    case sensorCounter = 2:
+       client.publish('comcar/car', 'count auf 2')
+       break;
+    case sensorCounter = 3:
+      client.publish('comcar/car', 'count auf 3')
+      break;
+    case sensorCounter = 4:
+      client.publish('comcar/car', 'count auf 4')
+      break;
+    case sensorCounter = 5:
+      client.publish('comcar/car', 'count auf 5')
+      break;*/
+       
+       
+  }
