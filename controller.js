@@ -18,9 +18,7 @@ app.get('/', function(req, res) {
     opened:opened,
     forceState: forceState
   });
-});
-
-// Send AJAX! on request in /string
+})
 app.get("/string", function(req, res) {
     // Send Variable on request
     res.send(forceState.toString())
@@ -168,12 +166,12 @@ function drawerCheck (message) {
     sensorCounter++;
     drawer = true;
     console.log(sensorCounter)
-    console.log('test true')
+    console.log('drawer true')
   } else {
-    drawer = false;
     sensorCounter--;
+    drawer = false;
     console.log(sensorCounter)
-    console.log('test false')
+    console.log('drawer false')
   }
 
 sensorCounterCheck();
