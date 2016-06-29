@@ -1,0 +1,346 @@
+
+// This #include statement was automatically added by the Spark IDE.
+#include "MQTT/MQTT.h"
+
+
+// Car connected to D0
+int carPin = D0;                
+
+// Photocell
+int photocellPin = A2;     // the cell and 10K pulldown are connected to a2
+int photocellReading;     // the analog reading from photocell
+
+// Photocell2
+int photocellPin2 = A3;     // the cell and 10K pulldown are connected to a3
+int photocellReading2;     // the analog reading from photocell
+
+//Water
+const int readWater = A1; //Sensor A1 pin to Arduino pin A1
+int valueWater;     		 //Variable to store the incomming data
+
+//FSR
+int fsrAnalogPin = A0; // FSR is connected to A0
+int fsrReading;      // the analog reading from the FSR 
+
+// ULTRASCHALL Sensor 1
+int trigPin1 = D6;
+int echoPin1 = D7;
+
+// ULTRASCHALL Sensor 2
+int trigPin2 = D4;
+int echoPin2 = D5;
+ 
+// Ultraschall funktions variablen
+long duration, SensorOne, SensorTwo;
+int distance;
+
+
+
+void callback(char* topic, byte* payload, unsigned int length);
+
+// Define Broker
+MQTT client("broker.hivemq.com", 1883, callback);
+unsigned int interval = 1000*60;
+
+
+
+
+// recieve message
+void callback(char* topic, byte* payload, unsigned int length) {
+    char p[length + 1];
+    memcpy(p, payload, length);
+    p[length] = NULL;
+    String message(p);
+    
+    /*//if answer RED than turn LED RED
+    if (message.equals("RED"))    
+        RGB.color(255, 0, 0);
+        //if answer GREEN than turn LED Green
+    else if (message.equals("GREEN"))    
+        RGB.color(0, 255, 0);
+        //if answer BLUE than turn LED Blue
+    else if (message.equals("BLUE"))    
+        RGB.color(0, 0, 255);
+    else    
+        RGB.color(255, 255, 255);
+    delay(500);*/
+}//callback
+
+void reconnect() {
+    // If not conected, turn LED red
+  while (Spark.connected() == false) {
+    RGB.color(255, 0, 0);
+    Spark.connect();
+    delay(1000);
+  }
+  // if connected show up green led
+  RGB.color(0, 255, 0);
+  delay(1000);
+}//reconnect
+
+void setup() {
+    
+    // Car Motor Controll Pin
+    pinMode(carPin, OUTPUT);      // sets the digital pin as output
+
+     // Ultraschall Sensor 1
+    pinMode(trigPin1, OUTPUT); // Sets the trigPin as an Output
+    pinMode(echoPin1, INPUT); // Sets the echoPin as an Input
+    
+    // Ultraschall Sensor 2
+    pinMode(trigPin2, OUTPUT); // Sets the trigPin as an Output
+    pinMode(echoPin2, INPUT); // Sets the echoPin as an Input
+    
+    // Turn on RGB Controll for Spark
+    RGB.control(true);
+    // connect to the server
+    client.connect("clientR"); 
+    //subscribe to Chanels
+    if (client.isConnected()) 
+         client.subscribe("comcar/car");
+        
+         client.subscribe("comcar/home/sonic/1");
+         client.subscribe("comcar/home/sonic/2");
+         
+         client.subscribe("comcar/home/force/1");
+         
+         client.subscribe("comcar/home/water/1");
+         
+         client.subscribe("comcar/home/photo/1");
+         
+         client.subscribe("comcar/home/photo/2");
+       
+    
+}//setup
+
+     // Force state
+  bool fsrUsed = false;
+  
+  // Schall 1 State
+  bool s1Used = false;
+  
+  // Schall 2 State
+  bool s2Used = false;
+  
+  // Water
+  bool waterUsed = false;
+  
+  // Photocell 1 State
+  bool photo1Used = false;
+  
+  // Photocell 1 State
+  bool photo2Used = false;
+  
+  // Sensor Counter for used elements at Home for Car States
+  int sensorCounter = 0;
+
+void loop() {
+
+// Photocell
+photocellReading = analogRead(photocellPin);
+photocellReading2 = analogRead(photocellPin2);
+ 
+Serial.print("Photocell ONE reading = ");
+Serial.println(photocellReading);     // the raw analog reading
+  
+Serial.print("Photocell TWO reading = ");
+Serial.println(photocellReading2);     // the raw analog reading
+
+// Water Read
+valueWater = analogRead(readWater); //Read data from analog pin and store it to value variable
+Serial.print("Watersensor = ");
+Serial.println(valueWater);
+    
+    // Schall 1
+SonarSensor(trigPin1, echoPin1);
+SensorOne = distance;
+
+// Schall 2
+SonarSensor(trigPin2, echoPin2);
+SensorTwo = distance;
+
+
+
+  // FSR Read
+  fsrReading = analogRead(fsrAnalogPin);
+  Serial.print("Analog reading = ");
+  Serial.println(fsrReading);
+  delay(1000);
+  
+  // Display actual State
+  Serial.print("State reading = ");
+  Serial.println(sensorCounter);
+
+    
+    
+    // LOOP when connected
+    if (client.isConnected()) {
+        client.loop(); 
+        
+        // FSR LOOP
+         if(fsrReading > 200 && fsrUsed != true){
+             
+             // Set Force Touch to True
+             fsrUsed = true;
+             
+             
+             // Count +1 
+             sensorCounter++;
+             
+              // Send state to MQTT Broker
+             if(fsrUsed == true){
+                 client.publish("comcar/home/force/1", "true"); 
+             }
+         }
+        
+        // UltraSonic 1 Loop
+       
+         if(SensorOne < 6 && s1Used != true){
+            
+            // Set Ultrasonic 1 to True
+             s1Used = true;
+             
+             // Count +1 
+             sensorCounter++;
+             
+              // Send state to MQTT Broker
+             if(s1Used == true){
+                 client.publish("comcar/home/sonic/1", "true"); 
+             }
+         }
+         
+         // UltraSonic 2 Loop
+       
+         if(SensorTwo < 8 && s2Used != true){
+            
+            // Set Ultrasonic 2 to True
+             s2Used = true;
+             
+             // Count +1 
+             sensorCounter++;
+             
+             // Send state to MQTT Broker 
+             if(s2Used == true){
+                 client.publish("comcar/home/sonic/2", "true"); 
+             }
+         }
+         
+         // Photocell 1 ( Schrank )
+         
+         if(photocellReading > 1400 && photo1Used != true){
+            
+            // Set Photocell 1 triggered to True
+             photo1Used = true;
+             
+             // Count +1 
+             sensorCounter++;
+             
+              // Send state to MQTT Broker
+             if(photo1Used == true){
+                 client.publish("comcar/home/photo/1", "true"); 
+             }
+         }
+         
+         // Photocell 2 ( KuehlSchrank )
+         
+         if(photocellReading2 > 2900 && photo2Used != true){
+            
+            // Set Photocell 2 triggered to True
+             photo2Used = true;
+             
+             // Count +1 
+             sensorCounter++;
+             
+             // Send state to MQTT Broker
+             if(photo2Used == true){
+                 client.publish("comcar/home/photo/2", "true"); 
+             }
+         }
+         
+         
+         
+         // CAR STATES
+         if( sensorCounter <= 2){
+              digitalWrite(carPin, LOW);
+         }
+         else if(sensorCounter == 3){
+              digitalWrite(carPin, HIGH);   // Accelerate car
+              delay(2500);                  // for 2500ms
+              digitalWrite(carPin, LOW);    // Stop car
+              sensorCounter = 4;
+             
+  
+         }
+         else if(sensorCounter == 6){
+             // Move car +1
+              digitalWrite(carPin, HIGH);   // Accelerate car
+              delay(1500);                  // for 1500ms
+              digitalWrite(carPin, LOW);    // Stop car
+              sensorCounter = 7;
+         }
+         else if(sensorCounter == 8){
+             // Move car +1
+              digitalWrite(carPin, HIGH);   // Accelerate car
+              delay(1000);                  // for 1000ms
+              digitalWrite(carPin, LOW);    // Stop car
+             
+             // Set counter to 0
+              sensorCounter = 0;
+            
+            
+            // SET All Values to false ( Reset ) 
+                 
+              // Force state
+               fsrUsed = false;
+              // Schall 1 State
+               s1Used = false;
+              // Schall 2 State
+               s2Used = false;
+              // Water
+               waterUsed = false;
+              // Photocell 1 State
+               photo1Used = false;
+              // Photocell 1 State
+               photo2Used = false;
+         }
+         
+        
+        
+    }//if (client.isConnected())
+    else // Reconnect
+    {
+        Spark.process();
+        reconnect();
+        Spark.process();
+        client.connect("clientR");
+        Spark.process();
+        delay(100);
+     }    
+     
+     
+  
+     
+     
+}//loop
+
+
+// Funktion for Distance calculation Ultraschall
+void SonarSensor(int trigPin,int echoPin)
+{
+       
+
+        
+    // Clears the trigPin
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    // Sets the trigPin on HIGH state for 10 micro seconds
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+    // Reads the echoPin, returns the sound wave travel time in microseconds
+    duration = pulseIn(echoPin, HIGH);
+    // Calculating the distance
+    distance = (duration/2) / 29.1;
+        
+
+}
